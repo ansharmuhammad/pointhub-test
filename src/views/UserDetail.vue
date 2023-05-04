@@ -65,7 +65,7 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 const route = useRoute()
-const data = ref(null)
+const data = ref<any>(null)
 fetch(`https://dummyjson.com/users/${ route.params.id }`)
 .then(res => res.json())
 .then(json => data.value = json)

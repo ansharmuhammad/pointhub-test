@@ -9,7 +9,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
         </svg>
       </div>
-      <input v-model="search" @change="handleSearch(search)" type="text" id="input-group-1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com">
+      <input v-model="search" @change="handleSearch()" type="text" id="input-group-1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com">
     </div>
     <div v-if="data.users.length > 0" class="columns-1 pt-5">
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -28,7 +28,7 @@
                   </tr>
               </thead>
               <tbody>
-                  <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700" v-for="user in data?.users" :key="user?.id">
+                  <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700" v-for="user in users" :key="user.id">
                       <th scope="row" class="px-6 py-4 font-medium" style="color: blue !important;">                          
                           <router-link :to="'/' + user.id">
                             {{ user.firstName }} {{ user.lastName }}
@@ -88,25 +88,28 @@
 
 <script setup lang="ts">
 // import axios from 'axios'
-import { ref } from 'vue';
-const data = ref(null);
-const search = ref('');
+import { ref, reactive } from 'vue';
+
+const data = reactive<any>({})
+const users = ref<Array<any>>([])
+const search = ref<string>('');
 
 const totalPage = ref(0)
 const total = ref(0)
-const pagination = ref([])
+const pagination = ref<number[]>([])
 const page = ref(1)
 
-const getPage = (pagenumb) => {
+const getPage = (pagenumb: number) => {
   // pagination.value = []
-  let pageTemp = []
+  let pageTemp: Array<number> = []
   page.value = pagenumb
   let skip = (page.value-1) * 10;
   console.log(`https://dummyjson.com/users/search?q=${search.value}&limit=10&skip=${skip}`)
   fetch(`https://dummyjson.com/users/search?q=${search.value}&limit=10&skip=${skip}`)
   .then(res => res.json())
   .then(json => {
-    data.value = json
+    Object.assign(data, json)
+    users.value = data.users
     total.value = json.total
   })
   .then(()=>{
@@ -123,7 +126,6 @@ const getPage = (pagenumb) => {
     
     // rigthside
     if (page.value < (Math.floor(total.value / 10))){
-      console.log('masuk')
       for (let index = 1; index <= 3; index++) {
         if ((page.value + index) < (total.value / 10)) {
           pageTemp.push(page.value + index)
